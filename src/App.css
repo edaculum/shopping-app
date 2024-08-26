@@ -1,0 +1,65 @@
+body {
+  padding:0;
+  margin:0;
+}
+
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+/*yan yana gelir */
+.flex-row{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-column{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon{
+  font-size: 25px;
+  margin-right: 10px;
+}
+
+.App-header {
+  background-color: #091a3b;
+  height: 60px; /* Header yüksekliğini belirleyin */
+  display: flex;
+  flex-direction: row; /* Header içeriğini yatay hizalamak için */
+  align-items: center; /* İçeriği dikey olarak ortalamak için */
+  justify-content: space-between; /* İçerikleri yatayda dağıtmak için */
+  padding: 0 20px; /* Sağ ve sol padding ekleyin */
+  font-size: 18px; /* Metin boyutunu header için uygun hale getirin */
+  color: white;
+}
+
+.App-link {
+  color: #378ea7;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

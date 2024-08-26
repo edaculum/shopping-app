@@ -1,0 +1,71 @@
+/* Card bileşeninin genel görünümü */
+.card {
+    max-width: 345px; /* Maksimum genişlik */
+    box-shadow: 0 4px 8px rgba(75, 21, 145, 0.2); /* Gölge efekti */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Geçiş efektleri */
+    border-radius: 8px; /* Köşe yuvarlama */
+    overflow: hidden; /* İçeriğin taşmasını önler */
+    background-color: #adbbc7; /* Arka plan rengi */
+    margin: 10px; /* Kartlar arası boşluk */
+}
+
+/* Hover durumunda uygulanacak stil */
+.card:hover {
+    transform: scale(1.05); /* Kartın büyümesi */
+    box-shadow: 0 6px 12px rgba(134, 136, 158, 0.3); /* Daha belirgin gölge */
+}
+
+/* Kart başlığı için stil */
+.card-title {
+    font-size: 1.25rem; /* Başlık boyutu */
+    font-weight: bold; /* Başlık kalınlığı */
+    margin-bottom: 8px; /* Başlık altı boşluk */
+}
+
+/* Kart içeriği için stil */
+.card-content {
+    padding: 16px; /* İçerik paddingi */
+}
+
+/* Ürün fiyatı için stil */
+.card-price {
+    color: #2e7d32; /* Fiyat rengi */
+    font-size: 1rem; /* Fiyat boyutu */
+    margin-bottom: 8px; /* Fiyat altı boşluk */
+}
+
+/* Stok bilgisi için stil */
+.card-stock {
+    color: #d32f2f; /* Stok rengi */
+    font-size: 0.875rem; /* Stok boyutu */
+    margin-bottom: 8px; /* Stok altı boşluk */
+}
+
+/* Kart açıklaması için stil */
+.card-description {
+    font-size: 0.875rem; /* Açıklama boyutu */
+    color: #555; /* Açıklama rengi */
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #cccbd6; /* Arka plan rengi */
+    border-top: 1px solid #ddd; /* Üst kenar çizgisi */
+}
+
+.card-media {
+    width: 100%; /* Resmin kapsayıcı genişliğini kaplamasını sağlar */
+    height: 250px; /* Resim yüksekliği */
+    object-fit: cover; /* Resmin kapsayıcıyı tamamen kaplamasını sağlar */
+    border-bottom: 1px solid #ddd; /* Alt kenar çizgisi */
+}
+
+.button-primary {
+    background-color: #062a4e; /* Lacivert arka plan rengi */
+    color: white; /* Beyaz metin rengi */
+    border-radius: 8px; /* Köşeleri yuvarlat */
+    padding: 6px 12px; /* İç boşluk */
+    margin-right: 8px; /* Sağda boşluk bırak */
+}
