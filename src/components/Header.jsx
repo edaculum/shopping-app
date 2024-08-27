@@ -1,21 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaBasketShopping } from 'react-icons/fa6';
+import { FaUser } from "react-icons/fa";
 import '../App.css'; 
 
-function Header({ categories = [], isLoading = false, error = null }) {
+function Header({ categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn }) {
+
+    useEffect(() => {
+        // Sayfa yüklendiğinde, localStorage'dan giriş durumunu oku
+        const savedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        setIsLoggedIn(savedIsLoggedIn);
+    }, [setIsLoggedIn]);
+
+    const handleLogout = () => {
+        localStorage.removeItem('isLoggedIn'); // Kullanıcı çıkış yaptığında localStorage'dan durumu kaldır
+        setIsLoggedIn(false); // Çıkış yapıldığında kullanıcıyı çıkış yapmış olarak işaretle
+    };
+
     return (
         <header className="App-header">
             <div className="container">
-                <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <div className="d-flex flex-wrap align-items-center justify-content-between">
                     <Link to="/shopping" className="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
                         <h2>MyShop</h2>
                     </Link>
 
                     <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                         <li>
-                            <Link to="shopping/anasayfa" className="nav-link px-2 text-white">Anasayfa</Link>
+                            <Link to="/anasayfa" className="nav-link px-2 text-white">Anasayfa</Link>
                         </li>
                         <li className="dropdown">
                             <button className="nav-link dropdown-toggle btn text-white border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ backgroundColor: '#091a3b' }}>
@@ -39,9 +52,25 @@ function Header({ categories = [], isLoading = false, error = null }) {
                         </li>
                     </ul>
 
-                    <div className="text-end">
-                    <Link to="/login" className="btn btn-outline-light me-2">Login</Link>
-                    <Link to="/signup" className="btn btn-outline-light">Sign-up</Link>
+                    <div className="text-end ms-auto d-flex align-items-center">
+                        {isLoggedIn ? (
+                            <li className="dropdown me-2">
+                                <button className="nav-link dropdown-toggle btn text-white border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ backgroundColor: '#091a3b' }}>
+                                    <FaUser /> Hesabım
+                                </button>
+                                <ul className="dropdown-menu">
+                                    <li><Link to="/profile" className="dropdown-item">Kullanıcı Bilgilerim</Link></li>
+                                    <li><Link to="/orders" className="dropdown-item">Siparişlerim</Link></li>
+                                    <li><Link to="/order-history" className="dropdown-item">Geçmiş Siparişlerim</Link></li>
+                                    <li><button onClick={handleLogout} className="dropdown-item">Çıkış Yap</button></li>
+                                </ul>
+                            </li>
+                        ) : (
+                            <div>
+                                <Link to="/login" className="btn btn-outline-light me-2">Login</Link>
+                                <Link to="/signup" className="btn btn-outline-light">Sign-up</Link>
+                            </div>
+                        )}
                         <FaBasketShopping className='icon ms-2' />
                     </div>
                 </div>
@@ -51,5 +80,4 @@ function Header({ categories = [], isLoading = false, error = null }) {
 }
 
 export default Header;
-
 

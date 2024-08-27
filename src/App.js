@@ -9,11 +9,13 @@ import PageContainer from './container/PageContainer';
 import LoginPage from './pages/LoginPage'; // LoginPage eklendi
 import SignUpPage from './pages/SignUpPage'; // SignUpPage eklendi
 
+
 function App() {
     const [categories, setCategories] = useState([]);
     const [cities, setCities] = useState([]); // Şehirler için state
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
         const fetchData = async () => {
@@ -38,13 +40,15 @@ function App() {
 
     return (
         <Router>
-            <Header categories={categories} isLoading={isLoading} error={error} />
+            <Header categories={categories} isLoading={isLoading} error={error} isLoggedIn={isLoggedIn} 
+                setIsLoggedIn={setIsLoggedIn} />
             <PageContainer>
                 <Routes>
                     <Route path="/anasayfa" element={<HomePage />} />
                     <Route path="shopping/kategoriler/:id" element={<CategoryPage categories={categories} />} />
-                    <Route path="/login" element={<LoginPage />} /> {/* Login route eklendi */}
+                    <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} /> {/* Login route eklendi */}
                     <Route path="/signup" element={<SignUpPage cities={cities} />} /> {/* Sign-up route eklendi ve cities props olarak eklendi */}
+                  
                     {/* Diğer rotalar */}
                 </Routes>
             </PageContainer>
