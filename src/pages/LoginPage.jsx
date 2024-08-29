@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../css/LoginPage.css'; 
 
-function LoginPage({ setIsLoggedIn }) {
+function LoginPage({ setIsLoggedIn, onClose  }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
@@ -17,6 +17,7 @@ function LoginPage({ setIsLoggedIn }) {
                 // başarılı girişte:
                 localStorage.setItem('isLoggedIn', 'true');
                 setIsLoggedIn(true);
+                onClose(); // Modal'ı kapat
                 navigate('/anasayfa');
             }
         } catch (err) {
@@ -56,4 +57,5 @@ function LoginPage({ setIsLoggedIn }) {
 }
 
 export default LoginPage;
+
 

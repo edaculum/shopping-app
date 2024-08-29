@@ -16,6 +16,7 @@ function App() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
 
   useEffect(() => {
         const fetchData = async () => {
@@ -38,7 +39,10 @@ function App() {
         fetchData();
     }, []);
 
+
+
     return (
+        
         <Router>
             <Header categories={categories} isLoading={isLoading} error={error} isLoggedIn={isLoggedIn} 
                 setIsLoggedIn={setIsLoggedIn} />

@@ -5,7 +5,7 @@ import CitySelect from '../pages/CitySelect';
 import '../css/SignUpPage.css'; // css dosyasını import edin
 
 
-function SignUpPage() {
+function SignUpPage({ onClose }) {
     const [name, setName] = useState('');
     const [surname, setSurname] = useState('');
     const [email, setEmail] = useState('');
@@ -28,6 +28,8 @@ function SignUpPage() {
             });
             // Başarılı olursa, yönlendirme yapılır
             if (response.data) {
+                // Kayıt başarılı, modal'ı kapat
+                onClose();
                 navigate('/login');
             }
         } catch (err) {

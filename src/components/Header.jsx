@@ -1,11 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState  } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaBasketShopping } from 'react-icons/fa6';
 import { FaUser } from "react-icons/fa";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import LoginPage from '../pages/LoginPage'; // LoginPage bileşenini import ettik
+import SignUpPage from '../pages/SignUpPage'; // SignUpPage bileşenini import ettik
 import '../App.css'; 
 
 function Header({ categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn }) {
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
     useEffect(() => {
         // Sayfa yüklendiğinde, localStorage'dan giriş durumunu oku
@@ -67,14 +73,34 @@ function Header({ categories = [], isLoading = false, error = null, isLoggedIn =
                             </li>
                         ) : (
                             <div>
-                                <Link to="/login" className="btn btn-outline-light me-2">Login</Link>
-                                <Link to="/signup" className="btn btn-outline-light">Sign-up</Link>
+                                <Button variant="outline-light" className="me-2" onClick={() => setIsLoginModalOpen(true)}>Login</Button>
+                                <Button variant="outline-light" onClick={() => setIsSignUpModalOpen(true)}>Sign-up</Button>
                             </div>
                         )}
                         <FaBasketShopping className='icon ms-2' />
                     </div>
                 </div>
             </div>
+
+            {/* Login Modal */}
+            <Modal show={isLoginModalOpen} onHide={() => setIsLoginModalOpen(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Login</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <LoginPage setIsLoggedIn={setIsLoggedIn} onClose={() => setIsLoginModalOpen(false)} />
+                </Modal.Body>
+            </Modal>
+
+            {/* Sign Up Modal */}
+            <Modal show={isSignUpModalOpen} onHide={() => setIsSignUpModalOpen(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Sign Up</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <SignUpPage onClose={() => setIsSignUpModalOpen(false)} />
+                </Modal.Body>
+            </Modal>
         </header>
     );
 }
