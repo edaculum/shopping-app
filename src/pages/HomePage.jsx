@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Grid, Card, CardMedia, CardContent, CardActions, Typography, Button } from '@mui/material'; // Gerekli MUI bileşenlerini içe aktarın
 
-const HomePage = () => {
+const HomePage = ({ addToCart }) => {
   // Ürünleri depolamak için state
   const [products, setProducts] = useState([]);
 
@@ -61,7 +61,7 @@ const HomePage = () => {
                   >
                     ${product.price}
                   </Typography>
-                  <Button className="button-primary" size="small">
+                  <Button className="button-primary" size="small" onClick={() => addToCart(product)}>
                     Sepete Ekle
                   </Button>
                   <Button className="button-primary" size="small">

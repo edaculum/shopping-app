@@ -16,9 +16,10 @@ function LoginPage({ setIsLoggedIn, onClose  }) {
             if (response.data) {
                 // başarılı girişte:
                 localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userId', response.data.userId); // Kullanıcı ID'sini sakla sepet işlemleri için
                 setIsLoggedIn(true);
                 onClose(); // Modal'ı kapat
-                navigate('/anasayfa');
+                navigate('/shopping/anasayfa');
             }
         } catch (err) {
             setError(err.response?.data || 'Bir hata oluştu.');

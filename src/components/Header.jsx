@@ -9,7 +9,7 @@ import LoginPage from '../pages/LoginPage'; // LoginPage bileşenini import etti
 import SignUpPage from '../pages/SignUpPage'; // SignUpPage bileşenini import ettik
 import '../App.css'; 
 
-function Header({ categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn }) {
+function Header({ categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn ,cart = []}) {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
@@ -34,7 +34,7 @@ function Header({ categories = [], isLoading = false, error = null, isLoggedIn =
 
                     <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                         <li>
-                            <Link to="/anasayfa" className="nav-link px-2 text-white">Anasayfa</Link>
+                            <Link to="/shopping/anasayfa" className="nav-link px-2 text-white">Anasayfa</Link>
                         </li>
                         <li className="dropdown">
                             <button className="nav-link dropdown-toggle btn text-white border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ backgroundColor: '#091a3b' }}>
@@ -77,7 +77,9 @@ function Header({ categories = [], isLoading = false, error = null, isLoggedIn =
                                 <Button variant="outline-light" onClick={() => setIsSignUpModalOpen(true)}>Sign-up</Button>
                             </div>
                         )}
-                        <FaBasketShopping className='icon ms-2' />
+                        <Link to="/cart">
+                           <FaBasketShopping className='icon ms-2' /> Sepet ({cart.length})
+                        </Link>
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Card, CardContent, Typography, Grid, CardMedia, CardActions, Button } from '@mui/material'; // CardActions ve Button içe aktarıldı
 import '../css/CategoryPage.css'; // Eğer CategoryPage.jsx src/pages/ dizinindeyse
 
-function CategoryPage({ categories }) {
+function CategoryPage({ categories , addToCart }) {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -79,7 +79,7 @@ function CategoryPage({ categories }) {
 > 
                                   ${product.price}
                                   </Typography>
-                                    <Button  className="button-primary" size="small" >Sepete Ekle</Button>
+                                    <Button  className="button-primary" size="small" onClick={() => addToCart(product)}>Sepete Ekle</Button>
                                     <Button  className="button-primary" size="small" >Ürün Detay</Button>
                                 </CardActions>
                             </Card>
