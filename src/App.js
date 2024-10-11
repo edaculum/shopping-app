@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+
+// src/App.js
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
@@ -6,10 +8,16 @@ import CategoryPage from './pages/CategoryPage';
 import HomePage from './pages/HomePage';
 import Header from './components/Header';
 import PageContainer from './container/PageContainer';
-import LoginPage from './pages/LoginPage'; // LoginPage eklendi
-import SignUpPage from './pages/SignUpPage'; // SignUpPage eklendi
-import CartPage from './pages/CartPage'; // Sepet sayfası
-import OrderPage from './pages/OrderPage'; // Sipariş sayfası
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import CartPage from './pages/CartPage';
+import OrderPage from './pages/OrderPage';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Axios baseURL ayarlayın
+axios.defaults.baseURL = 'http://localhost:8080'; // Backend'inizin çalıştığı URL
+axios.defaults.withCredentials = true; // Eğer JWT veya cookie kullanıyorsanız
 
 function App() {
     const [categories, setCategories] = useState([]);
@@ -18,7 +26,9 @@ function App() {
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [customerId, setCustomerId] = useState(null);  // customerId state'ini ekledik
-    const [cart, setCart] = useState([]);  // Sepet için state
+    const [userName, setUserName] = useState(''); // userName state'i eklendi
+    const [userSurname, setUserSurname] = useState(''); // userSurname state'i eklendi
+    const [basket, setBasket] = useState(null);  // Sepet için state
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,13 +56,31 @@ function App() {
         setIsLoggedIn(savedIsLoggedIn);
 
         if (savedIsLoggedIn) {
-            const savedCustomerId = localStorage.getItem('userId'); // Burada userId kullanıyoruz
+            const savedCustomerId = localStorage.getItem('customerId'); // 'customerId' olarak ayarlandı
+            const savedUserName = localStorage.getItem('userName') || ''; // userName alındı
+            const savedUserSurname = localStorage.getItem('userSurname') || ''; // userSurname alındı
             setCustomerId(savedCustomerId);
+            setUserName(savedUserName);
+            setUserSurname(savedUserSurname);
             console.log('Saved customerId:', savedCustomerId); // Debug log
+
+            // Fetch basket when user is logged in
+            fetchBasket(savedCustomerId);
         }
     }, []);
 
-    const addToCart = async (productId, count) => {
+    const fetchBasket = async (customerId) => {
+        try {
+            const response = await axios.get(`/shopping/sepet/${customerId}`);
+            console.log('Sepet yanıtı:', response.data);
+            setBasket(response.data);
+        } catch (error) {
+            console.error('Sepet yüklenirken bir hata oluştu:', error);
+            setBasket(null);
+        }
+    };
+
+    const addToCart = async (productId, count = 1) => {
         if (!isLoggedIn) {
             alert('Lütfen giriş yapın.');
             return;
@@ -64,48 +92,76 @@ function App() {
         }
 
         try {
-            await axios.post('/shopping/sepet/sepeteEkle', { customerId, productId, count });
-            setCart((prevCart) => [...prevCart, { productId, count }]);
+            const response = await axios.post('/shopping/sepet/sepeteEkle', null, {
+                params: {
+                    customerId: customerId,
+                    productId: productId,
+                    count: count
+                }
+            });
+            console.log("Sepete ürün eklendi:", response.data);
+            setBasket(response.data);
+            // Bildirim göster
+            toast.success('Ürün başarıyla sepete eklenmiştir.');
         } catch (error) {
-            console.error('Sepete ürün eklenirken hata oluştu:', error);
+            console.error("Sepete ürün eklenirken hata oluştu:", error);
+            toast.error("Sepete ürün eklenirken hata oluştu. Lütfen tekrar deneyin.");
         }
     };
 
     const addOrder = async () => {
-        if (!isLoggedIn || !customerId || cart.length === 0) {
+        if (!isLoggedIn || !customerId || !basket || basket.basketItems.length === 0) {
             alert('Sipariş verebilmek için giriş yapmalı ve sepetinizde ürün bulunmalıdır.');
             return;
         }
 
         try {
-            await axios.post('/shopping/siparis/ekle', { customerId, products: cart });
-            alert('Siparişiniz başarıyla verildi.');
-            setCart([]);  // Siparişi verdikten sonra sepeti temizle
+            const response = await axios.post('/shopping/siparis/siparisOlustur', null, {
+                params: {
+                    customerId: customerId
+                }
+            });
+            toast.success('Siparişiniz başarıyla verildi.');
+            setBasket({ ...basket, basketItems: [] });  // Siparişi verdikten sonra sepeti temizle
+            console.log('Sipariş oluşturuldu:', response.data);
         } catch (error) {
             console.error('Sipariş verirken hata oluştu:', error);
-            alert('Sipariş verirken bir hata oluştu.');
+            toast.error('Sipariş verirken bir hata oluştu.');
         }
     };
 
     return (
         <Router>
-            <Header categories={categories} isLoading={isLoading} error={error} isLoggedIn={isLoggedIn} 
-                setIsLoggedIn={setIsLoggedIn} />
+            <Header 
+                categories={categories} 
+                isLoading={isLoading} 
+                error={error} 
+                isLoggedIn={isLoggedIn} 
+                setIsLoggedIn={setIsLoggedIn} 
+                setCustomerId={setCustomerId}
+                setUserName={setUserName} // setUserName prop ekledik
+                setUserSurname={setUserSurname} // setUserSurname prop ekledik
+                userName={userName} // userName prop ekledik
+                userSurname={userSurname} // userSurname prop ekledik
+                basket={basket} // Sepet bilgilerini Header'a gönderiyoruz
+            />
             <PageContainer>
                 <Routes>
-                    <Route path="/shopping/anasayfa" element={<HomePage addToCart={addToCart} />} /> {/* Sepete ekleme fonksiyonu gönderiliyor */}
+                    <Route path="/shopping/anasayfa" element={<HomePage addToCart={addToCart} />} />
                     <Route path="/shopping/kategoriler/:id" element={<CategoryPage categories={categories} addToCart={addToCart} />} />
-                    <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} setCustomerId={setCustomerId} />} /> {/* Login route eklendi */}
-                    <Route path="/signup" element={<SignUpPage cities={cities} />} /> {/* Sign-up route eklendi ve cities props olarak eklendi */}
-                    <Route path="/cart" element={<CartPage customerId={customerId} addOrder={addOrder} />} /> {/* Sepet sayfası */}
+                    <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} setCustomerId={setCustomerId} setUserName={setUserName} setUserSurname={setUserSurname} onClose={() => {}} fetchBasket={fetchBasket} />} />
+                    <Route path="/signup" element={<SignUpPage cities={cities} fetchBasket={fetchBasket} />} />
+                    <Route path="/cart" element={<CartPage customerId={customerId} setBasket={setBasket} addOrder={addOrder} />} />
                     <Route path="/orders" element={<OrderPage customerId={customerId} />} />
                     <Route path="/" element={<div>Ana Sayfa</div>} />
                 </Routes>
             </PageContainer>
+            <ToastContainer /> {/* ToastContainer ekleyin */}
         </Router>
     );
 }
 
 export default App;
+
 
 

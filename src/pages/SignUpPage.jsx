@@ -1,9 +1,10 @@
+
+// src/pages/SignUpPage.jsx
 import React, { useState } from 'react'; 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import CitySelect from '../pages/CitySelect';
-import '../css/SignUpPage.css'; // css dosyasını import edin
-
+import CitySelect from '../pages/CitySelect'; // CitySelect bileşenini doğru yolda import edin
+import '../css/SignUpPage.css'; // CSS dosyasını import edin
 
 function SignUpPage({ onClose }) {
     const [name, setName] = useState('');
@@ -11,7 +12,7 @@ function SignUpPage({ onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [cityId, setCityId] = useState(''); // Kullanıcının seçtiği şehir ID'sini saklar
-    const [adress, setAdress] = useState('');
+    const [address, setAddress] = useState('');
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
@@ -24,7 +25,7 @@ function SignUpPage({ onClose }) {
                 email, 
                 password, 
                 cityId, 
-                adress 
+                adress: address // "address" yerine "adress" kullanıldı
             });
             // Başarılı olursa, yönlendirme yapılır
             if (response.data) {
@@ -53,7 +54,7 @@ function SignUpPage({ onClose }) {
                         required
                         className={`input-field ${errors.name ? 'input-error' : ''}`}
                     />
-                  {errors.name && <p className="error-text">{errors.name}</p>}  {/* Hata mesajını göster */}
+                    {errors.name && <p className="error-text">{errors.name}</p>}  {/* Hata mesajını göster */}
                 </div>
                 <div className="form-group">
                     <label>Soyad</label>
@@ -97,10 +98,10 @@ function SignUpPage({ onClose }) {
                     <label>Adres</label>
                     <input
                         type="text"
-                        value={adress}
-                        onChange={(e) => setAdress(e.target.value)}
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
                         required
-                        className={`input-field ${errors.adress ? 'input-error' : ''}`}
+                        className={`input-field ${errors.adress ? 'input-error' : ''}`} // "address" yerine "adress" kontrolü
                     />
                     {errors.adress && <p className="error-text">{errors.adress}</p>}
                 </div>
@@ -112,6 +113,7 @@ function SignUpPage({ onClose }) {
 }
 
 export default SignUpPage;
+
 
 
 

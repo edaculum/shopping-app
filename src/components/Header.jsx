@@ -1,7 +1,9 @@
-import React, { useEffect, useState  } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaBasketShopping } from 'react-icons/fa6';
+import { toast } from 'react-toastify';
 import { FaUser } from "react-icons/fa";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
@@ -9,7 +11,7 @@ import LoginPage from '../pages/LoginPage'; // LoginPage bileşenini import etti
 import SignUpPage from '../pages/SignUpPage'; // SignUpPage bileşenini import ettik
 import '../App.css'; 
 
-function Header({ categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn ,cart = []}) {
+function Header({categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn, setCustomerId, setUserName,setUserSurname, userName,userSurname, cart = [] }) { // setCustomerId eklendi, setUserSurname ve userSurname eklendi
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
@@ -21,7 +23,14 @@ function Header({ categories = [], isLoading = false, error = null, isLoggedIn =
 
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn'); // Kullanıcı çıkış yaptığında localStorage'dan durumu kaldır
+        localStorage.removeItem('customerId'); // customerId'yi de kaldır
+        localStorage.removeItem('userName'); // userName'i de kaldır
+        localStorage.removeItem('userSurname'); // userSurname'i de kaldır
         setIsLoggedIn(false); // Çıkış yapıldığında kullanıcıyı çıkış yapmış olarak işaretle
+        setCustomerId(null); // customerId'yi sıfırla
+        setUserName(''); // userName'i sıfırla
+        setUserSurname(''); // userSurname'i sıfırla
+        toast.info("Başarıyla çıkış yaptınız.");
     };
 
     return (
@@ -90,7 +99,7 @@ function Header({ categories = [], isLoading = false, error = null, isLoggedIn =
                     <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <LoginPage setIsLoggedIn={setIsLoggedIn} onClose={() => setIsLoginModalOpen(false)} />
+                    <LoginPage setIsLoggedIn={setIsLoggedIn} setCustomerId={setCustomerId} setUserName={setUserName} setUserSurname={setUserSurname} onClose={() => setIsLoginModalOpen(false)} />
                 </Modal.Body>
             </Modal>
 
@@ -105,7 +114,10 @@ function Header({ categories = [], isLoading = false, error = null, isLoggedIn =
             </Modal>
         </header>
     );
+
 }
 
 export default Header;
+
+
 

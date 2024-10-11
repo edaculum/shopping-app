@@ -5,7 +5,8 @@ import axios from 'axios';
 import { Card, CardContent, Typography, Grid, CardMedia, CardActions, Button } from '@mui/material'; // CardActions ve Button içe aktarıldı
 import '../css/CategoryPage.css'; // Eğer CategoryPage.jsx src/pages/ dizinindeyse
 
-function CategoryPage({ categories , addToCart }) {
+
+function CategoryPage({ categories, addToCart }) {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -39,21 +40,20 @@ function CategoryPage({ categories , addToCart }) {
         return <div>Error: {error.message}</div>;
     }
 
-       return (
+    return (
         <div>
-            <h1>{categoryName} </h1>
+            <h1>{categoryName}</h1>
             <Grid container spacing={2}>
                 {products.length > 0 ? (
                     products.map((product) => (
                         <Grid item xs={12} sm={6} md={4} key={product.id}>
                             <Card className="card">
-                                {/* Resim URL'sini ekleyin */}
                                 <CardMedia
-                                    className="card-media" // Stil sınıfını ekleyin
+                                    className="card-media"
                                     component="img"
                                     alt={product.name}
                                     height="250"
-                                    image={product.imageurl} // Ürünün resim URL'si
+                                    image={product.imageurl}
                                 />
                                 <CardContent className='card-content'>
                                     <Typography variant="h5" component="div">
@@ -61,26 +61,32 @@ function CategoryPage({ categories , addToCart }) {
                                     </Typography>
                                     
                                     <Typography variant="body2" color="text.secondary">
-                                        Stok Durumu: {product.stock} {/* Stok bilgisi */}
+                                        Stok Durumu: {product.stock}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
                                         {product.description}
                                     </Typography>
                                 </CardContent>
                                 <CardActions className='card-actions'>
-                                <Typography
-                                   variant="body2"
-                                   color="text.secondary"
-                                   sx={{
-                                   fontSize: '1.5rem', // Fiyat büyüklüğü
-                                   fontWeight: 'bold', // Kalın yazı
-                                   color: '#003366', // Lacivert renk kodu
-                                   }}
-> 
-                                  ${product.price}
-                                  </Typography>
-                                    <Button  className="button-primary" size="small" onClick={() => addToCart(product)}>Sepete Ekle</Button>
-                                    <Button  className="button-primary" size="small" >Ürün Detay</Button>
+                                    <Typography
+                                       variant="body2"
+                                       color="text.secondary"
+                                       sx={{
+                                           fontSize: '1.5rem',
+                                           fontWeight: 'bold',
+                                           color: '#003366',
+                                       }}
+                                    > 
+                                        ${product.price}
+                                    </Typography>
+                                    <Button 
+                                        className="button-primary" 
+                                        size="small" 
+                                        onClick={() => addToCart(product.id, 1)} // Doğru parametreleri gönderin
+                                    >
+                                        Sepete Ekle
+                                    </Button>
+                                    <Button className="button-primary" size="small">Ürün Detay</Button>
                                 </CardActions>
                             </Card>
                         </Grid>

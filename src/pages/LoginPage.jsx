@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify'; // Import toast
 import '../css/LoginPage.css'; 
 
-function LoginPage({ setIsLoggedIn, onClose  }) {
+function LoginPage({ setIsLoggedIn, setCustomerId, setUserName,setUserSurname, onClose }) { // setUserName eklendi// setCustomerId eklendi
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
@@ -13,16 +15,31 @@ function LoginPage({ setIsLoggedIn, onClose  }) {
         e.preventDefault();
         try {
             const response = await axios.post('/shopping/musteriler/girisyap', { email, password });
-            if (response.data) {
-                // başarılı girişte:
+            if (response.data && response.data.id && response.data.name && response.data.surname) { // 'id', 'name' ve 'surname' kontrol ediliyor
+                const customerId = response.data.id;
+                const name = response.data.name;
+                const surname = response.data.surname;
+                console.log('Received customerId:', customerId); // Debug log
                 localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userId', response.data.userId); // Kullanıcı ID'sini sakla sepet işlemleri için
+                localStorage.setItem('customerId', customerId); // 'customerId' olarak ayarlandı
+                localStorage.setItem('userName', name); // userName olarak ayarlandı
+                localStorage.setItem('userSurname', surname); // userSurname olarak ayarlandı
                 setIsLoggedIn(true);
+                setCustomerId(customerId); // customerId'yi state'e set et
+                setUserName(name); // userName'i state'e set et
+                setUserSurname(surname); // userSurname'i state'e set et
+                toast.success(`Başarıyla giriş yaptınız ${name} ${surname}`); // Başarı bildirimi
                 onClose(); // Modal'ı kapat
                 navigate('/shopping/anasayfa');
+            } else {
+                throw new Error('Müşteri ID veya isim soyisim bulunamadı.')
             }
         } catch (err) {
-            setError(err.response?.data || 'Bir hata oluştu.');
+            console.error('Login error:', err);
+            // Backend'den gelen hata mesajı bir obje ise, şu şekilde alabilirsiniz:
+            // Eğer sadece string döndürüyorsa, bunu da kontrol etmelisiniz.
+            const errorMessage = typeof err.response?.data === 'string' ? err.response.data : (err.response?.data?.message || err.message || 'Bir hata oluştu.');
+            setError(errorMessage);
         }
     };
 
@@ -34,7 +51,7 @@ function LoginPage({ setIsLoggedIn, onClose  }) {
                 <div className="form-group">
                     <label className="form-label">Email</label>
                     <input
-                        className="form-input"
+                        className={`form-input ${error ? 'input-error' : ''}`}
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -44,7 +61,7 @@ function LoginPage({ setIsLoggedIn, onClose  }) {
                 <div className="form-group">
                     <label className="form-label">Şifre</label>
                     <input
-                        className="form-input"
+                        className={`form-input ${error ? 'input-error' : ''}`}
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -58,5 +75,7 @@ function LoginPage({ setIsLoggedIn, onClose  }) {
 }
 
 export default LoginPage;
+
+
 
 
