@@ -1,4 +1,3 @@
-
 // src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -17,7 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Axios baseURL ayarlayın
 axios.defaults.baseURL = 'http://localhost:8080'; // Backend'inizin çalıştığı URL
-axios.defaults.withCredentials = true; // Eğer JWT veya cookie kullanıyorsanız
+
 
 function App() {
     const [categories, setCategories] = useState([]);
@@ -28,7 +27,7 @@ function App() {
     const [customerId, setCustomerId] = useState(null);  // customerId state'ini ekledik
     const [userName, setUserName] = useState(''); // userName state'i eklendi
     const [userSurname, setUserSurname] = useState(''); // userSurname state'i eklendi
-    const [basket, setBasket] = useState(null);  // Sepet için state
+    const [basket, setBasket] = useState({ basketItems: [] });  // Sepet için state başlangıçta boş
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,7 +35,7 @@ function App() {
                 // Kategoriler için API çağrısı
                 const categoryResponse = await axios.get('/shopping/kategoriler');
                 setCategories(categoryResponse.data);
-                
+
                 // Şehirler için API çağrısı
                 const cityResponse = await axios.get('/shopping/sehirler');
                 setCities(cityResponse.data);
@@ -73,10 +72,15 @@ function App() {
         try {
             const response = await axios.get(`/shopping/sepet/${customerId}`);
             console.log('Sepet yanıtı:', response.data);
-            setBasket(response.data);
+            setBasket(response.data || { basketItems: [] }); // Eğer response boş ise, boş sepet
         } catch (error) {
             console.error('Sepet yüklenirken bir hata oluştu:', error);
-            setBasket(null);
+            if (error.response && error.response.status === 400) {
+                // 400 hatası alındığında boş sepet olarak ayarla
+                setBasket({ basketItems: [] });
+            } else {
+                setError('Sepet yüklenirken bir hata oluştu.');
+            }
         }
     };
 
@@ -100,7 +104,7 @@ function App() {
                 }
             });
             console.log("Sepete ürün eklendi:", response.data);
-            setBasket(response.data);
+            setBasket(response.data || { basketItems: [] });
             // Bildirim göster
             toast.success('Ürün başarıyla sepete eklenmiştir.');
         } catch (error) {
@@ -122,7 +126,7 @@ function App() {
                 }
             });
             toast.success('Siparişiniz başarıyla verildi.');
-            setBasket({ ...basket, basketItems: [] });  // Siparişi verdikten sonra sepeti temizle
+            setBasket({ basketItems: [] });  // Siparişi verdikten sonra sepeti temizle
             console.log('Sipariş oluşturuldu:', response.data);
         } catch (error) {
             console.error('Sipariş verirken hata oluştu:', error);
@@ -151,7 +155,7 @@ function App() {
                     <Route path="/shopping/kategoriler/:id" element={<CategoryPage categories={categories} addToCart={addToCart} />} />
                     <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} setCustomerId={setCustomerId} setUserName={setUserName} setUserSurname={setUserSurname} onClose={() => {}} fetchBasket={fetchBasket} />} />
                     <Route path="/signup" element={<SignUpPage cities={cities} fetchBasket={fetchBasket} />} />
-                    <Route path="/cart" element={<CartPage customerId={customerId} setBasket={setBasket} addOrder={addOrder} />} />
+                    <Route path="/cart" element={<CartPage customerId={customerId} basket={basket} setBasket={setBasket} addOrder={addOrder} />} />
                     <Route path="/orders" element={<OrderPage customerId={customerId} />} />
                     <Route path="/" element={<div>Ana Sayfa</div>} />
                 </Routes>
@@ -162,6 +166,4 @@ function App() {
 }
 
 export default App;
-
-
 

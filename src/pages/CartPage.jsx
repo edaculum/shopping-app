@@ -4,8 +4,7 @@ import axios from 'axios';
 import { Button, Typography, List, ListItem, ListItemText } from '@mui/material';
 import { toast } from 'react-toastify'; // Import toast
 
-const CartPage = ({ customerId, addOrder }) => {
-    const [basket, setBasket] = useState(null); // Başlangıçta null olarak ayarladık
+const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -17,23 +16,26 @@ const CartPage = ({ customerId, addOrder }) => {
             try {
                 const response = await axios.get(`/shopping/sepet/${customerId}`);
                 console.log('Sepet yanıtı:', response.data);
-                setBasket(response.data);
+                setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
             } catch (error) {
                 console.error('Sepet yüklenirken bir hata oluştu:', error);
-                setError('Sepet yüklenirken bir hata oluştu.');
+                if (error.response && error.response.status === 400) {
+                    setBasket({ basketItems: [] });
+                } else {
+                    setError('Sepet yüklenirken bir hata oluştu.');
+                }
             } finally {
                 setIsLoading(false);
             }
-
         };
 
         loadBasket();
-    }, [customerId]);
+    }, [customerId, setBasket]);
 
     const handleRemoveProduct = async (itemId) => {
         try {
             const response = await axios.delete(`/shopping/sepet/ürünüSil/${itemId}`);
-            setBasket(response.data);
+            setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
             toast.success('Ürün sepetten kaldırıldı.');
         } catch (error) {
             console.error('Ürün silinirken bir hata oluştu:', error);
@@ -50,7 +52,7 @@ const CartPage = ({ customerId, addOrder }) => {
                     count: 1
                 }
             });
-            setBasket(response.data);
+            setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
             toast.success('Ürün miktarı artırıldı.');
         } catch (error) {
             console.error('Ürün miktarı artırılırken hata oluştu:', error);
@@ -59,32 +61,32 @@ const CartPage = ({ customerId, addOrder }) => {
     };
 
     const handleDecreaseQuantity = async (itemId, productId, currentCount) => {
-    if (currentCount === 1) {
-        // Eğer miktar 1 ise, ürünü tamamen kaldır
-        handleRemoveProduct(itemId);
-        return;
-    }
+        if (currentCount === 1) {
+            // Eğer miktar 1 ise, ürünü tamamen kaldır
+            await handleRemoveProduct(itemId);
+            return;
+        }
 
-    try {
-        const response = await axios.post(`/shopping/sepet/sepeteEkle`, null, {
-            params: {
-                customerId: customerId,
-                productId: productId,
-                count: -1
-            }
-        });
-        setBasket(response.data);
-        toast.success('Ürün miktarı azaltıldı.');
-    } catch (error) {
-        console.error('Ürün miktarı azaltılırken hata oluştu:', error);
-        toast.error('Ürün miktarı azaltılırken hata oluştu.');
-    }
-};
+        try {
+            const response = await axios.post(`/shopping/sepet/sepeteEkle`, null, {
+                params: {
+                    customerId: customerId,
+                    productId: productId,
+                    count: -1
+                }
+            });
+            setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
+            toast.success('Ürün miktarı azaltıldı.');
+        } catch (error) {
+            console.error('Ürün miktarı azaltılırken hata oluştu:', error);
+            toast.error('Ürün miktarı azaltılırken hata oluştu.');
+        }
+    };
 
     const handleClearBasket = async () => {
         try {
             await axios.delete(`/shopping/sepet/sepetiTemizle/${customerId}`);
-            setBasket({ basketItems: [] }); // Sepeti temizledikten sonra boş bir sepet ayarla
+            setBasket({ basketItems: [] }); // Sepeti temizledikten sonra boş sepet ayarla
             toast.success('Sepet temizlendi.');
         } catch (error) {
             console.error('Sepet temizlenirken bir hata oluştu:', error);
@@ -103,7 +105,7 @@ const CartPage = ({ customerId, addOrder }) => {
             toast.success('Siparişiniz başarıyla oluşturuldu.');
             setBasket({ basketItems: [] }); // Siparişi verdikten sonra sepeti temizle
         } catch (error) {
-            console.error('Sipariş oluşturulurken bir hata oluştu:', error);
+            console.error('Sipariş oluşturulurken hata oluştu:', error);
             toast.error('Sipariş oluşturulurken bir hata oluştu.');
         }
     };
@@ -118,7 +120,26 @@ const CartPage = ({ customerId, addOrder }) => {
             ) : error ? (
                 <Typography color="error">{error}</Typography>
             ) : !basket || !basket.basketItems || basket.basketItems.length === 0 ? (
-                <Typography>Sepetiniz boş.</Typography>
+                <div>
+                    <Typography>Sepetiniz boş.</Typography>
+                    <div style={{ marginTop: '20px' }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleClearBasket}
+                        >
+                            Sepeti Temizle
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={handleCreateOrder}
+                            style={{ marginLeft: '10px' }}
+                        >
+                            Siparişi Ver
+                        </Button>
+                    </div>
+                </div>
             ) : (
                 <>
                     <List>
@@ -181,5 +202,3 @@ const CartPage = ({ customerId, addOrder }) => {
 };
 
 export default CartPage;
-
-
