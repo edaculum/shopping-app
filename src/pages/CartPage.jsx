@@ -1,47 +1,76 @@
 // src/pages/CartPage.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { Button, Typography, List, ListItem, ListItemText, Modal, TextField, FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
 import { toast } from 'react-toastify'; // Import toast
+
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
 const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+    const [orderAddress, setOrderAddress] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('card');
 
     useEffect(() => {
         if (!customerId) return;
-
+    
         const loadBasket = async () => {
             setIsLoading(true);
             try {
                 const response = await axios.get(`/shopping/sepet/${customerId}`);
-                console.log('Sepet yanıtı:', response.data);
-                setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
+                console.log('Sepet yanıtı:', response.data); // Debug log
+    
+                // Sepet öğelerini kontrol edin
+                response.data.basketItems.forEach(item => {
+                    console.log(`Basket Item ID: ${item.id}`);
+                });
+    
+                setBasket(response.data);
             } catch (error) {
                 console.error('Sepet yüklenirken bir hata oluştu:', error);
-                if (error.response && error.response.status === 400) {
-                    setBasket({ basketItems: [] });
-                } else {
-                    setError('Sepet yüklenirken bir hata oluştu.');
-                }
+                setError('Sepet yüklenirken bir hata oluştu.');
+                setBasket({ basketItems: [] }); // Hata durumunda sepeti temizle
             } finally {
                 setIsLoading(false);
             }
         };
-
+    
         loadBasket();
     }, [customerId, setBasket]);
-
+    
     const handleRemoveProduct = async (itemId) => {
+        if (!itemId) {
+            toast.error('Ürün ID bulunamadı.');
+            return;
+        }
+    
         try {
             const response = await axios.delete(`/shopping/sepet/ürünüSil/${itemId}`);
-            setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
+            console.log('Ürün silme yanıtı:', response.data);
+            if (response.data && Array.isArray(response.data.basketItems)) {
+                setBasket(response.data);
+            } else {
+                setBasket({ basketItems: [] });
+            }
             toast.success('Ürün sepetten kaldırıldı.');
         } catch (error) {
             console.error('Ürün silinirken bir hata oluştu:', error);
             toast.error('Ürün silinirken bir hata oluştu.');
         }
     };
+    
 
     const handleIncreaseQuantity = async (itemId, productId) => {
         try {
@@ -52,7 +81,8 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                     count: 1
                 }
             });
-            setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
+            console.log('Ürün arttırma yanıtı:', response.data);
+            setBasket(response.data);
             toast.success('Ürün miktarı artırıldı.');
         } catch (error) {
             console.error('Ürün miktarı artırılırken hata oluştu:', error);
@@ -75,7 +105,8 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                     count: -1
                 }
             });
-            setBasket(response.data || { basketItems: [] }); // `setBasket` kullanıldı
+            console.log('Ürün azaltma yanıtı:', response.data);
+            setBasket(response.data);
             toast.success('Ürün miktarı azaltıldı.');
         } catch (error) {
             console.error('Ürün miktarı azaltılırken hata oluştu:', error);
@@ -85,8 +116,9 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
 
     const handleClearBasket = async () => {
         try {
-            await axios.delete(`/shopping/sepet/sepetiTemizle/${customerId}`);
-            setBasket({ basketItems: [] }); // Sepeti temizledikten sonra boş sepet ayarla
+            const response = await axios.delete(`/shopping/sepet/sepetiTemizle/${customerId}`);
+            console.log('Sepet temizleme yanıtı:', response.data);
+            setBasket(response.data);
             toast.success('Sepet temizlendi.');
         } catch (error) {
             console.error('Sepet temizlenirken bir hata oluştu:', error);
@@ -94,16 +126,26 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
         }
     };
 
-    const handleCreateOrder = async () => {
-        if (!basket || !basket.basketItems || basket.basketItems.length === 0) {
-            alert('Sepetiniz boş. Sipariş veremezsiniz.');
-            return;
-        }
+    const handleCreateOrder = () => {
+        // Sepet boş olsa da buton görünmeli
+        setIsOrderModalOpen(true);
+    };
 
+    const handleOrderSubmit = async (e) => {
+        e.preventDefault();
+        // Sipariş detayları oluştur
+        const orderDetails = {
+            address: orderAddress,
+            paymentMethod: paymentMethod
+            // Diğer detaylar eklenebilir
+        };
         try {
-            await addOrder();
+            await addOrder(orderDetails);
             toast.success('Siparişiniz başarıyla oluşturuldu.');
             setBasket({ basketItems: [] }); // Siparişi verdikten sonra sepeti temizle
+            setIsOrderModalOpen(false);
+            setOrderAddress('');
+            setPaymentMethod('card');
         } catch (error) {
             console.error('Sipariş oluşturulurken hata oluştu:', error);
             toast.error('Sipariş oluşturulurken bir hata oluştu.');
@@ -145,37 +187,40 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                     <List>
                         {basket.basketItems.map((item) => (
                             <ListItem key={item.id}>
-                                <ListItemText
-                                    primary={item.product.name}
-                                    secondary={`Fiyat: ${item.price} TL - Miktar: ${item.count}`}
-                                />
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    onClick={() => handleIncreaseQuantity(item.id, item.product.id)}
-                                >
-                                    +
-                                </Button>
-                                <Typography variant="body1" style={{ margin: '0 10px' }}>
-                                    {item.count}
-                                </Typography>
-                                <Button
-                                    variant="outlined"
-                                    color="secondary"
-                                    onClick={() => handleDecreaseQuantity(item.id, item.product.id, item.count)}
-                                    disabled={item.count <= 1}
-                                >
-                                    -
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    onClick={() => handleRemoveProduct(item.id)}
-                                    style={{ marginLeft: '10px' }}
-                                >
-                                    Kaldır
-                                </Button>
-                            </ListItem>
+                            <ListItemText
+                                primary={item.product.name}
+                                secondary={`Fiyat: ${item.price} TL - Miktar: ${item.count}`}
+                            />
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={() => handleIncreaseQuantity(item.id, item.product.id)}
+                            >
+                                +
+                            </Button>
+                            <Typography variant="body1" style={{ margin: '0 10px' }}>
+                                {item.count}
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => handleDecreaseQuantity(item.id, item.product.id, item.count)}
+                                disabled={item.count <= 1}
+                            >
+                                -
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={() => {
+                                    console.log('Silinecek Ürün ID:', item.id); // Debug log
+                                    handleRemoveProduct(item.id);
+                                }}
+                                style={{ marginLeft: '10px' }}
+                            >
+                                Kaldır
+                            </Button>
+                        </ListItem>
                         ))}
                     </List>
                     <div style={{ marginTop: '20px' }}>
@@ -197,8 +242,41 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                     </div>
                 </>
             )}
+
+            {/* Order Modal */}
+            <Modal open={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)}>
+                <Box sx={modalStyle}>
+                    <form onSubmit={handleOrderSubmit}>
+                        <TextField
+                            label="Adres"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            value={orderAddress}
+                            onChange={(e) => setOrderAddress(e.target.value)}
+                            margin="normal"
+                        />
+                        <FormControl variant="outlined" fullWidth margin="normal" required>
+                            <InputLabel id="payment-method-label">Ödeme Yöntemi</InputLabel>
+                            <Select
+                                labelId="payment-method-label"
+                                label="Ödeme Yöntemi"
+                                value={paymentMethod}
+                                onChange={(e) => setPaymentMethod(e.target.value)}
+                            >
+                                <MenuItem value="card">Kart ile</MenuItem>
+                                <MenuItem value="cash">Kapıda</MenuItem>
+                            </Select>
+                        </FormControl>
+                        {/* Add more fields if necessary */}
+                        <Button type="submit" variant="contained" color="primary" fullWidth>
+                            Sipariş Ver
+                        </Button>
+                    </form>
+                </Box>
+            </Modal>
         </div>
     );
-};
 
+};
 export default CartPage;

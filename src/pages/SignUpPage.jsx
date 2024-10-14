@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import CitySelect from '../pages/CitySelect'; // CitySelect bileşenini doğru yolda import edin
 import '../css/SignUpPage.css'; // CSS dosyasını import edin
 
-function SignUpPage({ onClose }) {
+function SignUpPage({ onClose, fetchBasket }) { // fetchBasket prop'u eklendi
     const [name, setName] = useState('');
     const [surname, setSurname] = useState('');
     const [email, setEmail] = useState('');

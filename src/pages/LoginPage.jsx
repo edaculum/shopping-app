@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify'; // Import toast
 import '../css/LoginPage.css'; 
 
-function LoginPage({ setIsLoggedIn, setCustomerId, setUserName,setUserSurname, onClose }) { // setUserName eklendi// setCustomerId eklendi
+function LoginPage({ setIsLoggedIn, setCustomerId, setUserName,setUserSurname, onClose,fetchBasket }) { // setUserName eklendi// setCustomerId eklendi
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
@@ -28,8 +28,13 @@ function LoginPage({ setIsLoggedIn, setCustomerId, setUserName,setUserSurname, o
                 setCustomerId(customerId); // customerId'yi state'e set et
                 setUserName(name); // userName'i state'e set et
                 setUserSurname(surname); // userSurname'i state'e set et
+
+                // Sepet verilerini güncelle
+                fetchBasket(customerId); // fetchBasket fonksiyonunu çağırırken customerId parametresi ekleyin
+
                 toast.success(`Başarıyla giriş yaptınız ${name} ${surname}`); // Başarı bildirimi
                 onClose(); // Modal'ı kapat
+               
                 navigate('/shopping/anasayfa');
             } else {
                 throw new Error('Müşteri ID veya isim soyisim bulunamadı.')

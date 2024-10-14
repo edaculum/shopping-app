@@ -1,16 +1,16 @@
-
+// src/components/Header.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaShoppingBasket, FaUser } from 'react-icons/fa'; // Doğru ikonları import ettik
 import { toast } from 'react-toastify';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal'; // Eğer React Bootstrap kullanıyorsanız
+import Button from 'react-bootstrap/Button'; // Eğer React Bootstrap kullanıyorsanız
 import LoginPage from '../pages/LoginPage'; // LoginPage bileşenini import ettik
 import SignUpPage from '../pages/SignUpPage'; // SignUpPage bileşenini import ettik
 import '../App.css'; 
 
-function Header({categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn, setCustomerId, setUserName,setUserSurname, userName,userSurname,  basket }) { // setCustomerId eklendi, setUserSurname ve userSurname eklendi
+function Header({categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn, setCustomerId, setUserName, setUserSurname, userName, userSurname, basket, setBasket, fetchBasket }) { // setCustomerId eklendi, setUserSurname ve userSurname eklendi
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
@@ -29,11 +29,12 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
         setCustomerId(null); // customerId'yi sıfırla
         setUserName(''); // userName'i sıfırla
         setUserSurname(''); // userSurname'i sıfırla
+        setBasket({ basketItems: [] }); // Sepeti temizle
         toast.info("Başarıyla çıkış yaptınız.");
     };
 
     // Toplam sepet sayısını hesaplama
-    const cartCount = basket && basket.basketItems
+    const cartCount = basket && Array.isArray(basket.basketItems)
         ? basket.basketItems.reduce((total, item) => total + item.count, 0)
         : 0;
 
@@ -86,11 +87,11 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
                             </li>
                         ) : (
                             <div>
-                                <Button variant="outline-light" className="me-2" onClick={() => setIsLoginModalOpen(true)}>Login</Button>
-                                <Button variant="outline-light" onClick={() => setIsSignUpModalOpen(true)}>Sign-up</Button>
+                                  <Button variant="outline-light" className="me-2" onClick={() => setIsLoginModalOpen(true)}>Login</Button>
+                                  <Button variant="outline-light" onClick={() => setIsSignUpModalOpen(true)}>Sign-up</Button>
                             </div>
                         )}
-                        <Link to="/cart">
+                        <Link to="/cart" className="d-flex align-items-center text-white text-decoration-none">
                            <FaShoppingBasket className='icon ms-2' /> Sepet ({cartCount})
                         </Link>
                     </div>
@@ -103,7 +104,7 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
                     <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <LoginPage setIsLoggedIn={setIsLoggedIn} setCustomerId={setCustomerId} setUserName={setUserName} setUserSurname={setUserSurname} onClose={() => setIsLoginModalOpen(false)} />
+                    <LoginPage setIsLoggedIn={setIsLoggedIn} setCustomerId={setCustomerId} setUserName={setUserName} setUserSurname={setUserSurname} onClose={() => setIsLoginModalOpen(false)} fetchBasket={fetchBasket} />
                 </Modal.Body>
             </Modal>
 
@@ -113,7 +114,7 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
                     <Modal.Title>Sign Up</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <SignUpPage onClose={() => setIsSignUpModalOpen(false)} />
+                    <SignUpPage onClose={() => setIsSignUpModalOpen(false)} fetchBasket={fetchBasket}/>
                 </Modal.Body>
             </Modal>
         </header>
@@ -121,4 +122,4 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
 
 }
 
-export default Header;
+export default Header; 
