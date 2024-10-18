@@ -1,7 +1,7 @@
 // src/pages/CartPage.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, Typography, List, ListItem, ListItemText, Modal, TextField, FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
+import { Button, Typography, List, ListItem, ListItemText, Modal, TextField, FormControl, InputLabel, Select, MenuItem, Box, FormControlLabel, Checkbox } from '@mui/material';
 import { toast } from 'react-toastify'; // Import toast
 
 const modalStyle = {
@@ -22,6 +22,9 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
     const [orderAddress, setOrderAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('card');
+    const [useSavedAddress, setUseSavedAddress] = useState(false);
+    // eslint-disable-next-line no-unused-vars
+    const [savedAddress, setSavedAddress] = useState('');
 
     useEffect(() => {
         if (!customerId) return;
@@ -49,7 +52,44 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
     
         loadBasket();
     }, [customerId, setBasket]);
+
+   //Kullanıcının kayıtlı adresini almak için bir API isteği 
+   // Kullanıcının kayıtlı adresini almak için bir API isteği 
+const fetchSavedAddress = async () => {
+    try {
+        const response = await axios.get(`/shopping/sepet/customers/${customerId}/adress`);
+        console.log('Kayıtlı adres yanıtı:', response.data);  // Daha detaylı log ekliyoruz
+
+        if (response.data) {
+            console.log('Adres bulundu:', response.data); // Ek log
+            setSavedAddress(response.data); // Kayıtlı adres state'ine ata
+            setOrderAddress(response.data); // Order address alanını doldur
+        } else {
+            toast.error('Kayıtlı adres bulunamadı.');
+        }
+    } catch (error) {
+        console.error('Adres çekilirken hata oluştu:', error);
+        toast.error('Adres bilgisi yüklenirken hata oluştu.');
+    }
+};
+
+
     
+    //Checkbox işaretlendiğinde adres bilgisi veri tabanından çekiliyor, işaret kaldırıldığında ise manuel giriş yapılabiliyor.
+    const handleUseSavedAddressChange = (e) => {
+        const isChecked = e.target.checked;
+        setUseSavedAddress(isChecked);
+        if (isChecked) {
+            console.log('Kayıtlı adres kullan seçildi.'); // Ek log
+            fetchSavedAddress();
+        } else {
+            console.log('Manuel adres girişi aktif.'); // Ek log
+            setOrderAddress(''); // Manuel giriş için alan boşaltılır
+        }
+    };
+    
+
+
     const handleRemoveProduct = async (basketItemId) => {
         if (!basketItemId) {
             toast.error('Ürün ID bulunamadı.');
@@ -243,10 +283,19 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                 </>
             )}
 
-            {/* Order Modal */}
+             {/* Order Modal */}
             <Modal open={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)}>
                 <Box sx={modalStyle}>
                     <form onSubmit={handleOrderSubmit}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={useSavedAddress}
+                                    onChange={handleUseSavedAddressChange}
+                                />
+                            }
+                            label="Kayıtlı adresimi kullan"
+                        />
                         <TextField
                             label="Adres"
                             variant="outlined"
@@ -254,6 +303,7 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                             required
                             value={orderAddress}
                             onChange={(e) => setOrderAddress(e.target.value)}
+                            disabled={useSavedAddress}
                             margin="normal"
                         />
                         <FormControl variant="outlined" fullWidth margin="normal" required>
@@ -268,7 +318,6 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                                 <MenuItem value="cash">Kapıda</MenuItem>
                             </Select>
                         </FormControl>
-                        {/* Add more fields if necessary */}
                         <Button type="submit" variant="contained" color="primary" fullWidth>
                             Sipariş Ver
                         </Button>
@@ -277,6 +326,5 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
             </Modal>
         </div>
     );
-
 };
 export default CartPage;
