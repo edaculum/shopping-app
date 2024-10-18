@@ -25,6 +25,7 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
     const [useSavedAddress, setUseSavedAddress] = useState(false);
     // eslint-disable-next-line no-unused-vars
     const [savedAddress, setSavedAddress] = useState('');
+    const [totalPrice, setTotalPrice] = useState(0); // Toplam fiyat için yeni state
 
     useEffect(() => {
         if (!customerId) return;
@@ -52,6 +53,14 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
     
         loadBasket();
     }, [customerId, setBasket]);
+
+       // Sepet güncellenince toplam fiyatı hesapla
+       useEffect(() => {
+        if (basket && basket.basketItems) {
+            const total = basket.basketItems.reduce((sum, item) => sum + (item.price * item.count), 0);
+            setTotalPrice(total);
+        }
+    }, [basket]);
 
    //Kullanıcının kayıtlı adresini almak için bir API isteği 
    // Kullanıcının kayıtlı adresini almak için bir API isteği 
@@ -204,6 +213,7 @@ const fetchSavedAddress = async () => {
             ) : !basket || !basket.basketItems || basket.basketItems.length === 0 ? (
                 <div>
                     <Typography>Sepetiniz boş.</Typography>
+
                     <div style={{ marginTop: '20px' }}>
                         <Button
                             variant="contained"
@@ -263,6 +273,14 @@ const fetchSavedAddress = async () => {
                         </ListItem>
                         ))}
                     </List>
+
+                         {/* Toplam fiyatı ekranda göster */}
+                        <Typography variant="h6" style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end',fontWeight: 'bold',color: '#2e4e71', }}>
+                            Toplam Fiyat: {totalPrice} TL
+
+                        </Typography>
+
+
                     <div style={{ marginTop: '20px' }}>
                         <Button
                             variant="contained"

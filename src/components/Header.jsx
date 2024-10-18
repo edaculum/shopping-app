@@ -1,39 +1,38 @@
-// src/components/Header.jsx
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // useNavigate eklendi
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { FaShoppingBasket, FaUser } from 'react-icons/fa'; // Doğru ikonları import ettik
+import { FaShoppingBasket, FaUser } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import Modal from 'react-bootstrap/Modal'; // Eğer React Bootstrap kullanıyorsanız
-import Button from 'react-bootstrap/Button'; // Eğer React Bootstrap kullanıyorsanız
-import LoginPage from '../pages/LoginPage'; // LoginPage bileşenini import ettik
-import SignUpPage from '../pages/SignUpPage'; // SignUpPage bileşenini import ettik
-import '../App.css'; 
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import LoginPage from '../pages/LoginPage';
+import SignUpPage from '../pages/SignUpPage';
+import '../App.css';
 
-function Header({categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn, setCustomerId, setUserName, setUserSurname, userName, userSurname, basket, setBasket, fetchBasket }) { // setCustomerId eklendi, setUserSurname ve userSurname eklendi
+function Header({categories = [], isLoading = false, error = null, isLoggedIn = false, setIsLoggedIn, setCustomerId, setUserName, setUserSurname, userName, userSurname, basket, setBasket, fetchBasket }) {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+    const navigate = useNavigate(); // useNavigate hook'u eklendi
 
     useEffect(() => {
-        // Sayfa yüklendiğinde, localStorage'dan giriş durumunu oku
         const savedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         setIsLoggedIn(savedIsLoggedIn);
     }, [setIsLoggedIn]);
 
     const handleLogout = () => {
-        localStorage.removeItem('isLoggedIn'); // Kullanıcı çıkış yaptığında localStorage'dan durumu kaldır
-        localStorage.removeItem('customerId'); // customerId'yi de kaldır
-        localStorage.removeItem('userName'); // userName'i de kaldır
-        localStorage.removeItem('userSurname'); // userSurname'i de kaldır
-        setIsLoggedIn(false); // Çıkış yapıldığında kullanıcıyı çıkış yapmış olarak işaretle
-        setCustomerId(null); // customerId'yi sıfırla
-        setUserName(''); // userName'i sıfırla
-        setUserSurname(''); // userSurname'i sıfırla
-        setBasket({ basketItems: [] }); // Sepeti temizle
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('customerId');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userSurname');
+        setIsLoggedIn(false);
+        setCustomerId(null);
+        setUserName('');
+        setUserSurname('');
+        setBasket({ basketItems: [] });
         toast.info("Başarıyla çıkış yaptınız.");
+        navigate('/shopping/anasayfa'); // Anasayfaya yönlendirme eklendi
     };
 
-    // Toplam sepet sayısını hesaplama
     const cartCount = basket && Array.isArray(basket.basketItems)
         ? basket.basketItems.reduce((total, item) => total + item.count, 0)
         : 0;
@@ -81,7 +80,6 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
                                 <ul className="dropdown-menu">
                                     <li><Link to="/profile" className="dropdown-item">Kullanıcı Bilgilerim</Link></li>
                                     <li><Link to="/orders" className="dropdown-item">Siparişlerim</Link></li>
-                                    <li><Link to="/order-history" className="dropdown-item">Geçmiş Siparişlerim</Link></li>
                                     <li><button onClick={handleLogout} className="dropdown-item">Çıkış Yap</button></li>
                                 </ul>
                             </li>
@@ -119,7 +117,7 @@ function Header({categories = [], isLoading = false, error = null, isLoggedIn = 
             </Modal>
         </header>
     );
-
 }
 
-export default Header; 
+export default Header;
+
