@@ -50,14 +50,14 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
         loadBasket();
     }, [customerId, setBasket]);
     
-    const handleRemoveProduct = async (itemId) => {
-        if (!itemId) {
+    const handleRemoveProduct = async (basketItemId) => {
+        if (!basketItemId) {
             toast.error('Ürün ID bulunamadı.');
             return;
         }
     
         try {
-            const response = await axios.delete(`/shopping/sepet/ürünüSil/${itemId}`);
+            const response = await axios.delete(`/shopping/sepet/urunuSil/${basketItemId}`);
             console.log('Ürün silme yanıtı:', response.data);
             if (response.data && Array.isArray(response.data.basketItems)) {
                 setBasket(response.data);
@@ -213,8 +213,8 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
                                 variant="contained"
                                 color="error"
                                 onClick={() => {
-                                    console.log('Silinecek Ürün ID:', item.id); // Debug log
-                                    handleRemoveProduct(item.id);
+                                    console.log('Silinecek Ürün ID:', item.basketItemId); // Debug log
+                                    handleRemoveProduct(item.basketItemId);
                                 }}
                                 style={{ marginLeft: '10px' }}
                             >
