@@ -12,7 +12,7 @@ const ProfilePage = ({ isLoggedIn }) => {
         surname: '',
         email: '',
         address: '',
-        city: { id: '', name: '' }
+        city: { id: '', name: '' } // Şehir bilgisi için başlangıç
     });
 
     const [editMode, setEditMode] = useState(false);
@@ -21,10 +21,9 @@ const ProfilePage = ({ isLoggedIn }) => {
         cityId: ''
     });
 
-    const [cities, setCities] = useState([]); // Şehirler listesi
+    const [cities, setCities] = useState([]);
     const navigate = useNavigate();
 
-    // Müşteri bilgilerini getir
     useEffect(() => {
         const storedEmail = localStorage.getItem('customerEmail');
         if (!isLoggedIn) {
@@ -36,10 +35,14 @@ const ProfilePage = ({ isLoggedIn }) => {
                 try {
                     const response = await axios.get(`http://localhost:8080/shopping/musteriler/me?email=${storedEmail}`);
                     if (response.data) {
-                        setCustomerInfo(response.data);
+                        const { city, ...rest } = response.data;
+                        setCustomerInfo({
+                            ...rest,
+                            city: { id: city?.id || '', name: city?.name || 'Bilinmiyor' }
+                        });
                         setUpdatedInfo({
                             address: response.data.address,
-                            cityId: response.data.city?.id || ''
+                            cityId: city?.id || ''
                         });
                     } else {
                         throw new Error('Veri yok');
@@ -57,11 +60,10 @@ const ProfilePage = ({ isLoggedIn }) => {
         }
     }, [isLoggedIn, navigate]);
 
-    // Şehir listesini getir
     useEffect(() => {
         const fetchCities = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/shopping/sehirler'); // Şehirleri getiren API
+                const response = await axios.get('http://localhost:8080/shopping/sehirler');
                 if (response.data.length > 0) {
                     setCities(response.data);
                 } else {
@@ -79,24 +81,26 @@ const ProfilePage = ({ isLoggedIn }) => {
         const { name, value } = e.target;
         setUpdatedInfo((prevState) => ({
             ...prevState,
-            [name]: value
+            [name]: value || customerInfo[name] // updatedInfo'da yoksa customerInfo'daki değeri kullan
         }));
     };
 
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
-
         try {
             const response = await axios.put(`http://localhost:8080/shopping/musteriler/me?email=${customerEmail}`, {
                 name: customerInfo.name,
                 surname: customerInfo.surname,
                 email: customerInfo.email,
-                address: updatedInfo.address,
-                cityId: updatedInfo.cityId
+                address: updatedInfo.address || customerInfo.address,
+                cityId: updatedInfo.cityId || customerInfo.city.id
             });
+
             setCustomerInfo(response.data);
             toast.success('Bilgiler başarıyla güncellendi.');
             setEditMode(false);
+            // Başarılı güncellemeden sonra yönlendirme
+            navigate('/shopping/anasayfa');
         } catch (error) {
             toast.error('Bilgiler güncellenirken bir hata oluştu: ' + error.message);
             console.error(error);
