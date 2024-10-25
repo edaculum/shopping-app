@@ -6,23 +6,18 @@ const OrderPage = ({ customerId }) => {
     const [orders, setOrders] = useState([]);
     const [orderDetails, setOrderDetails] = useState([]);
     const [open, setOpen] = useState(false);
-    const [selectedOrderTotalPrice, setSelectedOrderTotalPrice] = useState(0); 
 
     useEffect(() => {
         if (!customerId) return;
 
         axios.get(`/shopping/siparis/customer/${customerId}/orders`)
             .then(response => {
-                // Siparişlerin detaylarını almak için istek yapalım
                 const fetchOrderDetails = response.data.map(order => {
                     return axios.get(`/shopping/siparis/orderDetail/${order.id}`).then(detailResponse => {
-                        // Sipariş detaylarından toplam fiyatı hesapla
-                        const totalPrice = detailResponse.data.reduce((total, item) => total + (item.price * item.count || 0), 0);
-                        return { ...order, totalPrice }; // Sipariş nesnesini güncelle
+                        return order; // Toplam fiyat hesaplamasını kaldırdık
                     });
                 });
 
-                // Tüm istekler tamamlandıktan sonra siparişleri set et
                 Promise.all(fetchOrderDetails).then(ordersWithDetails => {
                     setOrders(ordersWithDetails);
                 });
@@ -36,8 +31,6 @@ const OrderPage = ({ customerId }) => {
         axios.get(`/shopping/siparis/orderDetail/${orderId}`)
             .then(response => {
                 setOrderDetails(response.data);
-                const totalPrice = response.data.reduce((total, item) => total + (item.price * item.count || 0), 0);
-                setSelectedOrderTotalPrice(totalPrice);
                 setOpen(true);
             })
             .catch(error => {
@@ -48,7 +41,6 @@ const OrderPage = ({ customerId }) => {
     const handleClose = () => {
         setOpen(false);
         setOrderDetails([]);
-        setSelectedOrderTotalPrice(0);
     };
 
     return (
@@ -69,13 +61,11 @@ const OrderPage = ({ customerId }) => {
                     >
                         <ListItemText 
                             primary={`Sipariş Tarihi: ${new Date(order.date).toLocaleDateString()}`} 
-                            secondary={`Toplam Fiyat: ${order.totalPrice !== undefined ? order.totalPrice : 'Hesaplanamadı'} TL`} 
                         />
                     </ListItem>
                 ))}
             </List>
 
-            {/* Sipariş detaylarını gösterecek Modal */}
             <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ backgroundColor: '#2e4e71', color: '#fff', textAlign: 'center' }}>Sipariş Detayları</DialogTitle>
                 <DialogContent sx={{ padding: '16px', backgroundColor: '#f5f5f5' }}>
@@ -97,10 +87,6 @@ const OrderPage = ({ customerId }) => {
                             ))}
                         </TableBody>
                     </Table>
-                    
-                    <Typography variant="h6" sx={{ marginTop: '20px', textAlign: 'right', color: 'gray' }}>
-                        Toplam Fiyat: {selectedOrderTotalPrice} TL 
-                    </Typography>
 
                     <Box display="flex" justifyContent="flex-end" mt={2}>
                         <Button onClick={handleClose} variant="contained" color="primary">Kapat</Button>

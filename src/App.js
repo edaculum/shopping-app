@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import CartPage from './pages/CartPage';
 import OrderPage from './pages/OrderPage';
+import ProfilePage from './pages/ProfilePage'; // ProfilePage import edildi
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -27,7 +28,7 @@ function App() {
     const [userName, setUserName] = useState(''); // userName state'i eklendi
     const [userSurname, setUserSurname] = useState(''); // userSurname state'i eklendi
     const [basket, setBasket] = useState({ basketItems: [] });  // Sepet için state başlangıçta boş
-
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -167,7 +168,14 @@ function App() {
                     <Route path="/signup" element={<SignUpPage cities={cities} fetchBasket={fetchBasket} />} />
                     <Route path="/cart" element={<CartPage customerId={customerId} basket={basket} setBasket={setBasket} addOrder={addOrder} />} />
                     <Route path="/orders" element={<OrderPage customerId={customerId} />} />
-                    <Route path="/" element={<div>Ana Sayfa</div>} />
+                    <Route path="/profile" element={
+                        <ProfilePage
+                            isLoggedIn={isLoggedIn}
+                           // userName={userName}
+                            //userSurname={userSurname}
+                            customerId={customerId}
+                        />
+                    } />
                 </Routes>
             </PageContainer>
             <ToastContainer /> {/* ToastContainer ekleyin */}

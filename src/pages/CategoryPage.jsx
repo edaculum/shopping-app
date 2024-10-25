@@ -77,7 +77,7 @@ function CategoryPage({ categories, addToCart }) {
                                            color: '#003366',
                                        }}
                                     > 
-                                        ${product.price}
+                                        {product.price} TL
                                     </Typography>
                                     <Button 
                                         className="button-primary" 

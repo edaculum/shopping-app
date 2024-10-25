@@ -54,13 +54,18 @@ const CartPage = ({ customerId, basket, setBasket, addOrder }) => {
         loadBasket();
     }, [customerId, setBasket]);
 
-       // Sepet güncellenince toplam fiyatı hesapla
-       useEffect(() => {
-        if (basket && basket.basketItems) {
-            const total = basket.basketItems.reduce((sum, item) => sum + (item.price * item.count), 0);
-            setTotalPrice(total);
-        }
-    }, [basket]);
+        // Sepet güncellenince toplam fiyatı hesapla
+        useEffect(() => {
+            if (basket && basket.basketItems) {
+                const total = basket.basketItems.reduce((sum, item) => {
+                    // Her bir ürün için doğru fiyat ve miktar kullanıldığından emin olun
+                    return sum + (item.product.price * item.count);
+                }, 0);
+                setTotalPrice(total);
+            }
+        }, [basket]);
+        
+    
 
    //Kullanıcının kayıtlı adresini almak için bir API isteği 
    // Kullanıcının kayıtlı adresini almak için bir API isteği 
@@ -131,7 +136,10 @@ const fetchSavedAddress = async () => {
                 }
             });
             console.log('Ürün arttırma yanıtı:', response.data);
-            setBasket(response.data);
+            setBasket(response.data); // Sepeti güncelle
+            // Toplam fiyatı güncelle
+            const updatedTotal = response.data.basketItems.reduce((sum, item) => sum + (item.price * item.count), 0);
+            setTotalPrice(updatedTotal);
             toast.success('Ürün miktarı artırıldı.');
         } catch (error) {
             console.error('Ürün miktarı artırılırken hata oluştu:', error);
@@ -141,7 +149,6 @@ const fetchSavedAddress = async () => {
 
     const handleDecreaseQuantity = async (itemId, productId, currentCount) => {
         if (currentCount === 1) {
-            // Eğer miktar 1 ise, ürünü tamamen kaldır
             await handleRemoveProduct(itemId);
             return;
         }
@@ -155,7 +162,10 @@ const fetchSavedAddress = async () => {
                 }
             });
             console.log('Ürün azaltma yanıtı:', response.data);
-            setBasket(response.data);
+            setBasket(response.data); // Sepeti güncelle
+            // Toplam fiyatı güncelle
+            const updatedTotal = response.data.basketItems.reduce((sum, item) => sum + (item.price * item.count), 0);
+            setTotalPrice(updatedTotal);
             toast.success('Ürün miktarı azaltıldı.');
         } catch (error) {
             console.error('Ürün miktarı azaltılırken hata oluştu:', error);

@@ -22,6 +22,7 @@ function LoginPage({ setIsLoggedIn, setCustomerId, setUserName,setUserSurname, o
                 console.log('Received customerId:', customerId); // Debug log
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('customerId', customerId); // 'customerId' olarak ayarlandı
+                localStorage.setItem('customerEmail', email); // Email'i kaydet
                 localStorage.setItem('userName', name); // userName olarak ayarlandı
                 localStorage.setItem('userSurname', surname); // userSurname olarak ayarlandı
                 setIsLoggedIn(true);
