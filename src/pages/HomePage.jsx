@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Grid, Card, CardMedia, CardContent, CardActions, Typography, Button } from '@mui/material'; // Gerekli MUI bileşenlerini içe aktarın
+import ProductModal from '../pages/ProductModal'; // Modal bileşenini içe aktarın
 
 const HomePage = ({ addToCart }) => {
   // Ürünleri depolamak için state
   const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Sayfa yüklendiğinde ürünleri getir
   useEffect(() => {
@@ -20,6 +23,16 @@ const HomePage = ({ addToCart }) => {
 
       fetchProducts();
   }, []); // Boş array ile sadece bir kez çalışır
+
+  const handleOpenModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProduct(null);
+    setIsModalOpen(false);
+  };
 
   return (
       <div>
@@ -67,7 +80,7 @@ const HomePage = ({ addToCart }) => {
                                   >
                                       Sepete Ekle
                                   </Button>
-                                  <Button className="button-primary" size="small">Ürün Detay</Button>
+                                  <Button size="small" onClick={() => handleOpenModal(product)}>Ürün Detay</Button>
                               </CardActions>
                           </Card>
                       </Grid>
@@ -76,6 +89,7 @@ const HomePage = ({ addToCart }) => {
                   <p>Yükleniyor...</p>
               )}
           </Grid>
+          <ProductModal open={isModalOpen} handleClose={handleCloseModal} product={selectedProduct} />
       </div>
   );
 };

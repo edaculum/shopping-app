@@ -4,14 +4,15 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent, Typography, Grid, CardMedia, CardActions, Button } from '@mui/material'; // CardActions ve Button içe aktarıldı
 import '../css/CategoryPage.css'; // Eğer CategoryPage.jsx src/pages/ dizinindeyse
-
+import ProductModal from '../pages/ProductModal'; // Modal bileşenini içe aktarın
 
 function CategoryPage({ categories, addToCart }) {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const { id } = useParams(); // Kategori ID'sini alır
-
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     // Kategori adı ayarlama
     const categoryName = categories.find(category => category.id === parseInt(id))?.name || 'Kategori Adı Bulunamadı';
 
@@ -39,6 +40,16 @@ function CategoryPage({ categories, addToCart }) {
     if (error) {
         return <div>Error: {error.message}</div>;
     }
+
+    const handleOpenModal = (product) => {
+        setSelectedProduct(product);
+        setIsModalOpen(true);
+      };
+    
+      const handleCloseModal = () => {
+        setSelectedProduct(null);
+        setIsModalOpen(false);
+      };
 
     return (
         <div>
@@ -86,7 +97,7 @@ function CategoryPage({ categories, addToCart }) {
                                     >
                                         Sepete Ekle
                                     </Button>
-                                    <Button className="button-primary" size="small">Ürün Detay</Button>
+                                    <Button size="small" onClick={() => handleOpenModal(product)}>Ürün Detay</Button>
                                 </CardActions>
                             </Card>
                         </Grid>
@@ -95,6 +106,7 @@ function CategoryPage({ categories, addToCart }) {
                     <Typography variant="h6">Bu kategori için ürün bulunamadı.</Typography>
                 )}
             </Grid>
+            <ProductModal open={isModalOpen} handleClose={handleCloseModal} product={selectedProduct} />
         </div>
     );
 }
